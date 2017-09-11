@@ -63,7 +63,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
-    <Message Text="Copy over MSBuild.exe.config" />
-    <Copy SourceFiles="$(OutputPath)Xamarin.Android.Build.exe.config" DestinationFiles="$(OutputPath)MSBuild.exe.config" />
+    <XmlPoke XmlInputPath="$(OutputPath)MSBuild.exe.config" Namespaces="&lt;Namespace Prefix='android' Uri='http://schemas.android.com/apk/res/android' /&gt;" Query="configuration/msbuildToolsets/toolset/projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath']/@value" Value="%24%28MSBuildProgramFiles32%29\MSBuild%3B%24%28XamarinAndroidPath%29" />
   </Target>
 </Project>
