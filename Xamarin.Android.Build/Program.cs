@@ -51,12 +51,17 @@ namespace Xamarin.Android.Build
 			//This was originally used on Windows, but seems to break w/ PCLs (tested Xamarin.Forms app)
 			//globalProperties["FrameworkPathOverride"] = Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0");
 
-			var logger = new BinaryLogger {
-				Parameters = "msbuild.binlog",
-				Verbosity = LoggerVerbosity.Diagnostic
-			};
 			var toolsetLocations = ToolsetDefinitionLocations.Default;
-			using (var projectCollection = new ProjectCollection (globalProperties, new[] { logger }, toolsetLocations)) {
+			var verbosity = LoggerVerbosity.Diagnostic;
+
+			var binaryLogger = new BinaryLogger {
+				Parameters = "msbuild.binlog",
+				Verbosity = verbosity
+			};
+			var consoleLogger = new ConsoleLogger {
+				Verbosity = verbosity,
+			};
+			using (var projectCollection = new ProjectCollection (globalProperties, new ILogger[] { binaryLogger, consoleLogger }, toolsetLocations)) {
 				var request = new BuildRequestData (args[0], globalProperties, projectCollection.DefaultToolsVersion, new[] { "Build" }, null);
 				var parameters = new BuildParameters (projectCollection) {
 					Loggers = projectCollection.Loggers,
