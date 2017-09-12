@@ -1,10 +1,12 @@
-﻿using Microsoft.Build.CommandLine;
+﻿using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
+using System.Linq;
 
 namespace Xamarin.Android.Build
 {
@@ -12,8 +14,7 @@ namespace Xamarin.Android.Build
 	{
 		static int Main (string[] args)
 		{
-			var commandLine      = new StringBuilder (Environment.CommandLine);
-			string currentDir    = Path.GetDirectoryName (Assembly.GetEntryAssembly ().Location);
+			string currentDir = Path.GetDirectoryName (Assembly.GetEntryAssembly ().Location);
 			string xaBuildOutput = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "..", "xamarin-android", "bin", "Debug"));
 
 			if (!Directory.Exists (xaBuildOutput)) {
@@ -21,7 +22,7 @@ namespace Xamarin.Android.Build
 				return 1;
 			}
 
-			string prefix              = Path.Combine (xaBuildOutput, "lib", "xamarin.android");
+			string prefix = Path.Combine (xaBuildOutput, "lib", "xamarin.android");
 			string frameworksDirectory = Path.Combine (prefix, "xbuild-frameworks");
 
 			//Copy .NETPortable directory if needed
@@ -32,30 +33,39 @@ namespace Xamarin.Android.Build
 				Copy (new DirectoryInfo (portableProfiles), new DirectoryInfo (copiedProfiles));
 			}
 
+			var globalProperties = new Dictionary<string, string> ();
+
 			//NOTE: used in MSBuild.exe.config
-			AddParameterIfOmitted (commandLine, "XamarinAndroidPath", Path.Combine (prefix, "xbuild"));
+			globalProperties["XamarinAndroidPath"] = Path.Combine (prefix, "xbuild");
 
 			//Pulled from xabuild.sh
-			AddParameterIfOmitted (commandLine, "AndroidSdkDirectory", Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile), "android-toolchain", "sdk"));
-			AddParameterIfOmitted (commandLine, "AndroidNdkDirectory", Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile), "android-toolchain", "ndk"));
-			AddParameterIfOmitted (commandLine, "MonoAndroidToolsDirectory", Path.Combine (prefix, "xbuild", "Xamarin", "Android"));
-			AddParameterIfOmitted (commandLine, "MonoDroidInstallDirectory", prefix);
-			AddParameterIfOmitted (commandLine, "TargetFrameworkRootPath", frameworksDirectory);
+			globalProperties["AndroidSdkDirectory"] = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile), "android-toolchain", "sdk");
+			globalProperties["AndroidNdkDirectory"] = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.UserProfile), "android-toolchain", "ndk");
+			globalProperties["MonoAndroidToolsDirectory"] = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
+			globalProperties["MonoDroidInstallDirectory"] = prefix;
+			globalProperties["TargetFrameworkRootPath"] = frameworksDirectory;
 
 			//WTF??? Seems to fix PCLs when you remove FrameworkPathOverride
-			AddParameterIfOmitted (commandLine, "NoStdLib", "True");
+			globalProperties["NoStdLib"] = "True";
 
 			//This was originally used on Windows, but seems to break w/ PCLs (tested Xamarin.Forms app)
-			//AddParameterIfOmitted (commandLine, "FrameworkPathOverride", Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0"));
+			//globalProperties["FrameworkPathOverride"] = Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0");
 
-			return MSBuildApp.Execute (commandLine.ToString ()) == MSBuildApp.ExitType.Success ? 0 : 1;
-		}
-
-		static void AddParameterIfOmitted (StringBuilder commandLine, string name, string value)
-		{
-			string prefix = "/p:" + name;
-			if (!commandLine.ToString ().Contains (prefix)) {
-				commandLine.Append ($" {prefix}=\"{value}\"");
+			var logger = new BinaryLogger {
+				Parameters = "msbuild.binlog",
+				Verbosity = LoggerVerbosity.Diagnostic
+			};
+			var toolsetLocations = ToolsetDefinitionLocations.Default;
+			using (var projectCollection = new ProjectCollection (globalProperties, new[] { logger }, toolsetLocations)) {
+				var request = new BuildRequestData (args[0], globalProperties, projectCollection.DefaultToolsVersion, new[] { "Build" }, null);
+				var parameters = new BuildParameters (projectCollection) {
+					Loggers = projectCollection.Loggers,
+					ToolsetDefinitionLocations = toolsetLocations,
+					DefaultToolsVersion = projectCollection.DefaultToolsVersion,
+					DetailedSummary = true,
+				};
+				var result = BuildManager.DefaultBuildManager.Build (parameters, request);
+				return result.OverallResult == BuildResultCode.Success ? 0 : 1;
 			}
 		}
 
