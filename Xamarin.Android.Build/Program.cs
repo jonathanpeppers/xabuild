@@ -45,6 +45,9 @@ namespace Xamarin.Android.Build
 			globalProperties["MonoDroidInstallDirectory"] = prefix;
 			globalProperties["TargetFrameworkRootPath"]   = frameworksDirectory;
 
+			//For some reason this is defaulting to \, which places stuff in C:\Debug
+			globalProperties["BaseIntermediateOutputPath"] = "obj\\";
+
 			//WTF??? Seems to fix PCLs when you remove FrameworkPathOverride
 			globalProperties["NoStdLib"] = "True";
 
