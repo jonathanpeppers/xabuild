@@ -41,7 +41,12 @@ namespace Xamarin.Android.Build
 			AddParameterIfOmitted (commandLine, "MonoAndroidToolsDirectory", Path.Combine (prefix, "xbuild", "Xamarin", "Android"));
 			AddParameterIfOmitted (commandLine, "MonoDroidInstallDirectory", prefix);
 			AddParameterIfOmitted (commandLine, "TargetFrameworkRootPath", frameworksDirectory);
-			AddParameterIfOmitted (commandLine, "FrameworkPathOverride", Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0"));
+
+			//WTF??? Seems to fix PCLs when you remove FrameworkPathOverride
+			AddParameterIfOmitted (commandLine, "NoStdLib", "True");
+
+			//This was originally used on Windows, but seems to break w/ PCLs (tested Xamarin.Forms app)
+			//AddParameterIfOmitted (commandLine, "FrameworkPathOverride", Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0"));
 
 			return MSBuildApp.Execute (commandLine.ToString ()) == MSBuildApp.ExitType.Success ? 0 : 1;
 		}
