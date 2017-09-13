@@ -1,2 +1,2 @@
 # xabuild
-Proof of concept of xabuild.exe
+Prototype of xabuild.exe, don't look here!
