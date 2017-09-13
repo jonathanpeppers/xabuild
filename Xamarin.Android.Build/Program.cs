@@ -24,10 +24,12 @@ namespace Xamarin.Android.Build
 			string prefix              = Path.Combine (xaBuildOutput, "lib", "xamarin.android");
 			string frameworksDirectory = Path.Combine (prefix, "xbuild-frameworks");
 			string userProfile         = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
+			string programFiles        = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
+			string vsInstallRoot       = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", "Enterprise");
+			string msbuildBin          = Path.Combine (vsInstallRoot, "MSBuild", "15.0", "Bin");
 
 			//Copy .NETPortable directory if needed
-			string portableProfiles    = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86),
-				"Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+			string portableProfiles    = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 			string copiedProfiles      = Path.Combine (frameworksDirectory, ".NETPortable");
 			if (!Directory.Exists (copiedProfiles)) {
 				Copy (new DirectoryInfo (portableProfiles), new DirectoryInfo (copiedProfiles));
@@ -35,15 +37,17 @@ namespace Xamarin.Android.Build
 
 			var globalProperties = new Dictionary<string, string> ();
 
-			//NOTE: used in MSBuild.exe.config
-			globalProperties["XamarinAndroidPath"]        = Path.Combine (prefix, "xbuild");
+			//NOTE: used in xabuild.exe.config
+			globalProperties["CustomMSBuildExtensionsPath"] = Path.Combine (prefix, "xbuild");
 
 			//Pulled from xabuild.sh
-			globalProperties["AndroidSdkDirectory"]       = Path.Combine (userProfile, "android-toolchain", "sdk");
-			globalProperties["AndroidNdkDirectory"]       = Path.Combine (userProfile, "android-toolchain", "ndk");
-			globalProperties["MonoAndroidToolsDirectory"] = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
-			globalProperties["MonoDroidInstallDirectory"] = prefix;
-			globalProperties["TargetFrameworkRootPath"]   = frameworksDirectory;
+			globalProperties["AndroidSdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "sdk");
+			globalProperties["AndroidNdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "ndk");
+			globalProperties["MonoAndroidToolsDirectory"]   = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
+			globalProperties["MonoDroidInstallDirectory"]   = prefix;
+			globalProperties["TargetFrameworkRootPath"]     = frameworksDirectory;
+			globalProperties["VsInstallRoot"]               = vsInstallRoot;
+			globalProperties["RoslynTargetsPath"]           = Path.Combine (msbuildBin, "Roslyn");
 
 			//For some reason this is defaulting to \, which places stuff in C:\Debug
 			globalProperties["BaseIntermediateOutputPath"] = "obj\\";
@@ -65,6 +69,7 @@ namespace Xamarin.Android.Build
 				Verbosity = verbosity,
 			};
 			using (var projectCollection = new ProjectCollection (globalProperties, new ILogger[] { binaryLogger, consoleLogger }, toolsetLocations)) {
+
 				var request = new BuildRequestData (args[0], globalProperties, projectCollection.DefaultToolsVersion, new[] { "Build" }, null);
 				var parameters = new BuildParameters (projectCollection) {
 					Loggers = projectCollection.Loggers,
