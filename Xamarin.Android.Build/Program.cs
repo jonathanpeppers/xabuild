@@ -38,25 +38,25 @@ namespace Xamarin.Android.Build
 			var globalProperties = new Dictionary<string, string> ();
 
 			//NOTE: used in xabuild.exe.config
-			globalProperties["CustomMSBuildExtensionsPath"] = Path.Combine (prefix, "xbuild");
+			globalProperties ["CustomMSBuildExtensionsPath"] = Path.Combine (prefix, "xbuild");
 
 			//Pulled from xabuild.sh
-			globalProperties["AndroidSdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "sdk");
-			globalProperties["AndroidNdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "ndk");
-			globalProperties["MonoAndroidToolsDirectory"]   = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
-			globalProperties["MonoDroidInstallDirectory"]   = prefix;
-			globalProperties["TargetFrameworkRootPath"]     = frameworksDirectory;
-			globalProperties["VsInstallRoot"]               = vsInstallRoot;
-			globalProperties["RoslynTargetsPath"]           = Path.Combine (msbuildBin, "Roslyn");
+			globalProperties ["AndroidSdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "sdk");
+			globalProperties ["AndroidNdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "ndk");
+			globalProperties ["MonoAndroidToolsDirectory"]   = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
+			globalProperties ["MonoDroidInstallDirectory"]   = prefix;
+			globalProperties ["TargetFrameworkRootPath"]     = frameworksDirectory;
+			globalProperties ["VsInstallRoot"]               = vsInstallRoot;
+			globalProperties ["RoslynTargetsPath"]           = Path.Combine (msbuildBin, "Roslyn");
 
 			//For some reason this is defaulting to \, which places stuff in C:\Debug
-			globalProperties["BaseIntermediateOutputPath"] = "obj\\";
+			globalProperties ["BaseIntermediateOutputPath"] = "obj\\";
 
 			//WTF??? Seems to fix PCLs when you remove FrameworkPathOverride
 			globalProperties["NoStdLib"] = "True";
 
 			//This was originally used on Windows, but seems to break w/ PCLs (tested Xamarin.Forms app)
-			//globalProperties["FrameworkPathOverride"] = Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0");
+			//globalProperties ["FrameworkPathOverride"] = Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0");
 
 			var toolsetLocations = ToolsetDefinitionLocations.Default;
 			var verbosity        = LoggerVerbosity.Diagnostic;
