@@ -13,7 +13,7 @@ namespace Xamarin.Android.Build
 		AllowUnprivilegedCreate = 2,
 	}
 
-	class Program
+	class XABuild
 	{
 		[MTAThread]
 		static int Main ()

@@ -4,7 +4,7 @@ using System.IO;
 namespace Xamarin.Android.Build
 {
 	/// <summary>
-	/// Various paths needed by XABuild.exe
+	/// Various paths needed by xabuild.exe
 	/// </summary>
 	class XABuildPaths
 	{
