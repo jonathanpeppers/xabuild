@@ -51,12 +51,11 @@ namespace Xamarin.Android.Build
 			xml.Load (Path.Combine (paths.MSBuildBin, "MSBuild.exe.config"));
 
 			var toolsets = xml.SelectSingleNode ("configuration/msbuildToolsets/toolset");
-			toolsets.SelectSingleNode ("property[@name='VsInstallRoot']/@value").Value      = paths.VsInstallRoot;
-			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath']/@value").Value   = paths.MSBuildBin;
-			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath32']/@value").Value = paths.MSBuildBin;
-			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath64']/@value").Value = paths.MSBuildBin;
-			toolsets.SelectSingleNode ("property[@name='RoslynTargetsPath']/@value").Value  = Path.Combine (paths.MSBuildBin, "Roslyn");
-
+			SetProperty (toolsets, "VsInstallRoot", paths.VsInstallRoot);
+			SetProperty (toolsets, "MSBuildToolsPath", paths.MSBuildBin);
+			SetProperty (toolsets, "MSBuildToolsPath32", paths.MSBuildBin);
+			SetProperty (toolsets, "MSBuildToolsPath64", paths.MSBuildBin);
+			SetProperty (toolsets, "RoslynTargetsPath", Path.Combine (paths.MSBuildBin, "Roslyn"));
 			SetProperty (toolsets, "AndroidSdkDirectory", paths.AndroidSdkDirectory);
 			SetProperty (toolsets, "AndroidNdkDirectory", paths.AndroidNdkDirectory);
 			SetProperty (toolsets, "MonoAndroidToolsDirectory", paths.MonoAndroidToolsDirectory);
@@ -70,12 +69,20 @@ namespace Xamarin.Android.Build
 			xml.Save (Path.Combine (paths.XABuildDirectory, "xabuild.exe.config"));
 		}
 
+		/// <summary>
+		/// If the value exists, sets value attribute, else creates the element
+		/// </summary>
 		static void SetProperty(XmlNode toolsets, string name, string value)
 		{
-			var property = toolsets.OwnerDocument.CreateElement ("property");
-			property.SetAttribute ("name", name	);
-			property.SetAttribute ("value", value);
-			toolsets.PrependChild (property);
+			var valueAttribute = toolsets.SelectSingleNode ($"property[@name='{name}']/@value");
+			if (valueAttribute != null) {
+				valueAttribute.Value = value;
+			} else {
+				var property = toolsets.OwnerDocument.CreateElement ("property");
+				property.SetAttribute ("name", name);
+				property.SetAttribute ("value", value);
+				toolsets.PrependChild (property);
+			}
 		}
 
 		static bool CreateSymbolicLink(string source, string target)
