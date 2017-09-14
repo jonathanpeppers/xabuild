@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml;
 
@@ -22,53 +21,31 @@ namespace Xamarin.Android.Build
 	{
 		static int Main (string[] args)
 		{
-			string currentDir    = Path.GetDirectoryName (Assembly.GetEntryAssembly ().Location);
-			string xaBuildOutput = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "..", "xamarin-android", "bin", "Debug"));
-
-			if (!Directory.Exists (xaBuildOutput)) {
-				Console.WriteLine ($"Unable to find Xamarin.Android build output at {xaBuildOutput}");
+			var paths = new XABuildPaths ();
+			if (!Directory.Exists (paths.XamarinAndroidBuildOutput)) {
+				Console.WriteLine ($"Unable to find Xamarin.Android build output at {paths.XamarinAndroidBuildOutput}");
 				return 1;
 			}
-
-			string prefix               = Path.Combine (xaBuildOutput, "lib", "xamarin.android");
-			string frameworksDirectory  = Path.Combine (prefix, "xbuild-frameworks");
-			string userProfile          = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
-			string programFiles         = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
-			string vsInstallRoot        = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", "Enterprise");
-			string msbuildPath          = Path.Combine (vsInstallRoot, "MSBuild");
-			string msbuildBin           = Path.Combine (msbuildPath, "15.0", "Bin");
-			string customExtensionsPath = Path.Combine (prefix, "xbuild");
 
 			//Create a custom xabuild.exe.config
-			CreateConfig (currentDir, vsInstallRoot, msbuildBin, customExtensionsPath);
+			CreateConfig (paths);
 
 			//Create link to .NETPortable directory
-			string portableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
-			string customProfiles = Path.Combine (frameworksDirectory, ".NETPortable");
-			if (!CreateSymbolicLink (customProfiles, portableProfiles)) {
+			if (!CreateSymbolicLink (Path.Combine (paths.FrameworksDirectory, ".NETPortable"), paths.PortableProfiles)) {
 				return 1;
 			}
 
-			//Create link to Microsoft MSBuild targets
+			//Create link to Microsoft MSBuild targets directories
 			foreach (var dir in new [] { "Microsoft", "15.0" }) {
-				var target = Path.Combine (msbuildPath, dir);
+				var target = Path.Combine (paths.MSBuildPath, dir);
 				if (Directory.Exists (target)) {
-					if (!CreateSymbolicLink (Path.Combine (customExtensionsPath, dir), target)) {
+					if (!CreateSymbolicLink (Path.Combine (paths.CustomMSBuildExtensionsPath, dir), target)) {
 						return 1;
 					}
 				}
 			}
 
 			var globalProperties = new Dictionary<string, string> ();
-
-			//Pulled from xabuild.sh
-			globalProperties ["AndroidSdkDirectory"]          = Path.Combine (userProfile, "android-toolchain", "sdk");
-			globalProperties ["AndroidNdkDirectory"]          = Path.Combine (userProfile, "android-toolchain", "ndk");
-			globalProperties ["MonoAndroidToolsDirectory"]    = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
-			globalProperties ["MonoDroidInstallDirectory"]    = prefix;
-			globalProperties ["TargetFrameworkRootPath"]      = frameworksDirectory + Path.DirectorySeparatorChar; //NOTE: Must include trailing \
-			globalProperties ["CSharpDesignTimeTargetsPath"]  = Path.Combine (msbuildPath, "Microsoft", "VisualStudio", "Managed", "Microsoft.CSharp.DesignTime.targets");
-
 			var toolsetLocations = ToolsetDefinitionLocations.Default;
 			var verbosity        = LoggerVerbosity.Diagnostic;
 
@@ -92,28 +69,42 @@ namespace Xamarin.Android.Build
 			}
 		}
 
-		static void CreateConfig(string currentDir, string vsInstallRoot, string msbuildBin, string customExtensionsPath)
+		static void CreateConfig(XABuildPaths paths)
 		{
-			XmlDocument xml = new XmlDocument ();
-			xml.Load (Path.Combine (msbuildBin, "MSBuild.exe.config"));
+			var xml = new XmlDocument ();
+			xml.Load (Path.Combine (paths.MSBuildBin, "MSBuild.exe.config"));
 
 			var toolsets = xml.SelectSingleNode ("configuration/msbuildToolsets/toolset");
-			toolsets.SelectSingleNode ("property[@name='VsInstallRoot']/@value").Value      = vsInstallRoot;
-			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath']/@value").Value   = msbuildBin;
-			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath32']/@value").Value = msbuildBin;
-			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath64']/@value").Value = msbuildBin;
-			toolsets.SelectSingleNode ("property[@name='RoslynTargetsPath']/@value").Value  = Path.Combine (msbuildBin, "Roslyn");
+			toolsets.SelectSingleNode ("property[@name='VsInstallRoot']/@value").Value      = paths.VsInstallRoot;
+			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath']/@value").Value   = paths.MSBuildBin;
+			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath32']/@value").Value = paths.MSBuildBin;
+			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath64']/@value").Value = paths.MSBuildBin;
+			toolsets.SelectSingleNode ("property[@name='RoslynTargetsPath']/@value").Value  = Path.Combine (paths.MSBuildBin, "Roslyn");
+
+			SetProperty (toolsets, "AndroidSdkDirectory", paths.AndroidSdkDirectory);
+			SetProperty (toolsets, "AndroidNdkDirectory", paths.AndroidNdkDirectory);
+			SetProperty (toolsets, "MonoAndroidToolsDirectory", paths.MonoAndroidToolsDirectory);
+			SetProperty (toolsets, "TargetFrameworkRootPath", paths.FrameworksDirectory + Path.DirectorySeparatorChar); //NOTE: Must include trailing \
+			SetProperty (toolsets, "CSharpDesignTimeTargetsPath", paths.CSharpDesignTimeTargetsPath);
 
 			var msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath']/@value");
-			msbuildExtensionsPath.Value += ";" + customExtensionsPath;
+			msbuildExtensionsPath.Value += ";" + paths.CustomMSBuildExtensionsPath;
 
 			msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath32']/@value");
-			msbuildExtensionsPath.Value += ";" + customExtensionsPath;
+			msbuildExtensionsPath.Value += ";" + paths.CustomMSBuildExtensionsPath;
 
 			msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath64']/@value");
-			msbuildExtensionsPath.Value += ";" + customExtensionsPath;
+			msbuildExtensionsPath.Value += ";" + paths.CustomMSBuildExtensionsPath;
 
-			xml.Save (Path.Combine (currentDir, "xabuild.exe.config"));
+			xml.Save (Path.Combine (paths.XABuildDirectory, "xabuild.exe.config"));
+		}
+
+		static void SetProperty(XmlNode toolsets, string name, string value)
+		{
+			var property = toolsets.OwnerDocument.CreateElement ("property");
+			property.SetAttribute ("name", name	);
+			property.SetAttribute ("value", value);
+			toolsets.PrependChild (property);
 		}
 
 		static bool CreateSymbolicLink(string source, string target)
