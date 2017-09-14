@@ -37,7 +37,7 @@ namespace Xamarin.Android.Build.Tests
 		{
 			Clean (project);
 
-			var p = Process.Start (new ProcessStartInfo (xabuild, project) {
+			var p = Process.Start (new ProcessStartInfo (xabuild, $"{project} /bl") {
 				CreateNoWindow = true,
 				UseShellExecute = false,
 				WorkingDirectory = Path.GetDirectoryName (xabuild),

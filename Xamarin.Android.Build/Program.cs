@@ -1,9 +1,5 @@
-﻿using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
+﻿using Microsoft.Build.CommandLine;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -19,7 +15,8 @@ namespace Xamarin.Android.Build
 
 	class Program
 	{
-		static int Main (string[] args)
+		[MTAThread]
+		static int Main ()
 		{
 			var paths = new XABuildPaths ();
 			if (!Directory.Exists (paths.XamarinAndroidBuildOutput)) {
@@ -45,28 +42,7 @@ namespace Xamarin.Android.Build
 				}
 			}
 
-			var globalProperties = new Dictionary<string, string> ();
-			var toolsetLocations = ToolsetDefinitionLocations.Default;
-			var verbosity        = LoggerVerbosity.Diagnostic;
-
-			var binaryLogger = new BinaryLogger {
-				Parameters = "msbuild.binlog",
-				Verbosity = verbosity
-			};
-			var consoleLogger = new ConsoleLogger {
-				Verbosity = verbosity,
-			};
-			using (var projectCollection = new ProjectCollection (globalProperties, new ILogger[] { binaryLogger, consoleLogger }, toolsetLocations)) {
-				var request = new BuildRequestData (args[0], globalProperties, projectCollection.DefaultToolsVersion, new[] { "Build" }, null);
-				var parameters = new BuildParameters (projectCollection) {
-					Loggers = projectCollection.Loggers,
-					ToolsetDefinitionLocations = toolsetLocations,
-					DefaultToolsVersion = projectCollection.DefaultToolsVersion,
-					DetailedSummary = true,
-				};
-				var result = BuildManager.DefaultBuildManager.Build (parameters, request);
-				return result.OverallResult == BuildResultCode.Success ? 0 : 1;
-			}
+			return MSBuildApp.Main ();
 		}
 
 		static void CreateConfig(XABuildPaths paths)
