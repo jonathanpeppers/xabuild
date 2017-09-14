@@ -33,8 +33,6 @@ namespace Xamarin.Android.Build
 		/// </summary>
 		public string MSBuildBin { get; private set; }
 
-		public string CSharpDesignTimeTargetsPath { get; set; }
-
 		/// <summary>
 		/// Path to the .NETPortable directory
 		/// </summary>
@@ -70,7 +68,6 @@ namespace Xamarin.Android.Build
 			PortableProfiles            = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 			MSBuildPath                 = Path.Combine (VsInstallRoot, "MSBuild");
 			MSBuildBin                  = Path.Combine (MSBuildPath, "15.0", "Bin");
-			CSharpDesignTimeTargetsPath = Path.Combine (MSBuildPath, "Microsoft", "VisualStudio", "Managed", "Microsoft.CSharp.DesignTime.targets");
 			CustomMSBuildExtensionsPath = Path.Combine (prefix, "xbuild");
 			MonoAndroidToolsDirectory   = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
 			AndroidSdkDirectory         = Path.Combine (userProfile, "android-toolchain", "sdk");

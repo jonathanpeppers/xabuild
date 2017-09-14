@@ -32,16 +32,6 @@ namespace Xamarin.Android.Build
 				return 1;
 			}
 
-			//Create link to Microsoft MSBuild targets directories
-			foreach (var dir in new [] { "Microsoft", "15.0" }) {
-				var target = Path.Combine (paths.MSBuildPath, dir);
-				if (Directory.Exists (target)) {
-					if (!CreateSymbolicLink (Path.Combine (paths.CustomMSBuildExtensionsPath, dir), target)) {
-						return 1;
-					}
-				}
-			}
-
 			return MSBuildApp.Main ();
 		}
 
@@ -55,15 +45,16 @@ namespace Xamarin.Android.Build
 			SetProperty (toolsets, "MSBuildToolsPath", paths.MSBuildBin);
 			SetProperty (toolsets, "MSBuildToolsPath32", paths.MSBuildBin);
 			SetProperty (toolsets, "MSBuildToolsPath64", paths.MSBuildBin);
+			SetProperty (toolsets, "MSBuildExtensionsPath", paths.CustomMSBuildExtensionsPath);
+			SetProperty (toolsets, "MSBuildExtensionsPath32", paths.CustomMSBuildExtensionsPath);
 			SetProperty (toolsets, "RoslynTargetsPath", Path.Combine (paths.MSBuildBin, "Roslyn"));
 			SetProperty (toolsets, "AndroidSdkDirectory", paths.AndroidSdkDirectory);
 			SetProperty (toolsets, "AndroidNdkDirectory", paths.AndroidNdkDirectory);
 			SetProperty (toolsets, "MonoAndroidToolsDirectory", paths.MonoAndroidToolsDirectory);
 			SetProperty (toolsets, "TargetFrameworkRootPath", paths.FrameworksDirectory + Path.DirectorySeparatorChar); //NOTE: Must include trailing \
-			SetProperty (toolsets, "CSharpDesignTimeTargetsPath", paths.CSharpDesignTimeTargetsPath);
 
 			foreach (XmlNode property in toolsets.SelectNodes("projectImportSearchPaths/searchPaths/property[starts-with(@name, 'MSBuildExtensionsPath')]/@value")) {
-				property.Value += ";" + paths.CustomMSBuildExtensionsPath;
+				property.Value += ";" + paths.MSBuildPath;
 			}
 
 			xml.Save (Path.Combine (paths.XABuildDirectory, "xabuild.exe.config"));
