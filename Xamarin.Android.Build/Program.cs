@@ -20,8 +20,6 @@ namespace Xamarin.Android.Build
 
 	class Program
 	{
-		const string CustomMSBuildExtensionsPath = "CustomMSBuildExtensionsPath";
-
 		static int Main (string[] args)
 		{
 			string currentDir    = Path.GetDirectoryName (Assembly.GetEntryAssembly ().Location);
@@ -32,23 +30,36 @@ namespace Xamarin.Android.Build
 				return 1;
 			}
 
-			string prefix              = Path.Combine (xaBuildOutput, "lib", "xamarin.android");
-			string frameworksDirectory = Path.Combine (prefix, "xbuild-frameworks");
-			string userProfile         = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
-			string programFiles        = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
-			string vsInstallRoot       = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", "Enterprise");
-			string msbuildBin          = Path.Combine (vsInstallRoot, "MSBuild", "15.0", "Bin");
+			string prefix               = Path.Combine (xaBuildOutput, "lib", "xamarin.android");
+			string frameworksDirectory  = Path.Combine (prefix, "xbuild-frameworks");
+			string userProfile          = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
+			string programFiles         = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
+			string vsInstallRoot        = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", "Enterprise");
+			string msbuildPath          = Path.Combine (vsInstallRoot, "MSBuild");
+			string msbuildBin           = Path.Combine (msbuildPath, "15.0", "Bin");
+			string customExtensionsPath = Path.Combine (prefix, "xbuild");
 
 			//Create a custom xabuild.exe.config
-			CreateConfig (currentDir, vsInstallRoot, msbuildBin);
+			CreateConfig (currentDir, vsInstallRoot, msbuildBin, customExtensionsPath);
 
-			//Create link to .NETPortable directory if needed
-			LinkPortableProfiles (programFiles, frameworksDirectory);
+			//Create link to .NETPortable directory
+			string portableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+			string customProfiles = Path.Combine (frameworksDirectory, ".NETPortable");
+			if (!CreateSymbolicLink (customProfiles, portableProfiles)) {
+				return 1;
+			}
+
+			//Create link to Microsoft MSBuild targets
+			foreach (var dir in new [] { "Microsoft", "15.0" }) {
+				var target = Path.Combine (msbuildPath, dir);
+				if (Directory.Exists (target)) {
+					if (!CreateSymbolicLink (Path.Combine (customExtensionsPath, dir), target)) {
+						return 1;
+					}
+				}
+			}
 
 			var globalProperties = new Dictionary<string, string> ();
-
-			//NOTE: used in xabuild.exe.config
-			globalProperties [CustomMSBuildExtensionsPath] = Path.Combine (prefix, "xbuild");
 
 			//Pulled from xabuild.sh
 			globalProperties ["AndroidSdkDirectory"]          = Path.Combine (userProfile, "android-toolchain", "sdk");
@@ -56,9 +67,7 @@ namespace Xamarin.Android.Build
 			globalProperties ["MonoAndroidToolsDirectory"]    = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
 			globalProperties ["MonoDroidInstallDirectory"]    = prefix;
 			globalProperties ["TargetFrameworkRootPath"]      = frameworksDirectory + Path.DirectorySeparatorChar; //NOTE: Must include trailing \
-
-			//For some reason this is defaulting to \, which places stuff in C:\Debug
-			globalProperties ["BaseIntermediateOutputPath"] = "obj\\";
+			globalProperties ["CSharpDesignTimeTargetsPath"]  = Path.Combine (msbuildPath, "Microsoft", "VisualStudio", "Managed", "Microsoft.CSharp.DesignTime.targets");
 
 			var toolsetLocations = ToolsetDefinitionLocations.Default;
 			var verbosity        = LoggerVerbosity.Diagnostic;
@@ -71,7 +80,6 @@ namespace Xamarin.Android.Build
 				Verbosity = verbosity,
 			};
 			using (var projectCollection = new ProjectCollection (globalProperties, new ILogger[] { binaryLogger, consoleLogger }, toolsetLocations)) {
-
 				var request = new BuildRequestData (args[0], globalProperties, projectCollection.DefaultToolsVersion, new[] { "Build" }, null);
 				var parameters = new BuildParameters (projectCollection) {
 					Loggers = projectCollection.Loggers,
@@ -84,17 +92,12 @@ namespace Xamarin.Android.Build
 			}
 		}
 
-		static void CreateConfig(string currentDir, string vsInstallRoot, string msbuildBin)
+		static void CreateConfig(string currentDir, string vsInstallRoot, string msbuildBin, string customExtensionsPath)
 		{
 			XmlDocument xml = new XmlDocument ();
 			xml.Load (Path.Combine (msbuildBin, "MSBuild.exe.config"));
 
 			var toolsets = xml.SelectSingleNode ("configuration/msbuildToolsets/toolset");
-			var property = xml.CreateElement ("property");
-			property.SetAttribute ("name", "MSBuildBinPath");
-			property.SetAttribute ("value", msbuildBin);
-			//toolsets.AppendChild (property);
-
 			toolsets.SelectSingleNode ("property[@name='VsInstallRoot']/@value").Value      = vsInstallRoot;
 			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath']/@value").Value   = msbuildBin;
 			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath32']/@value").Value = msbuildBin;
@@ -102,19 +105,23 @@ namespace Xamarin.Android.Build
 			toolsets.SelectSingleNode ("property[@name='RoslynTargetsPath']/@value").Value  = Path.Combine (msbuildBin, "Roslyn");
 
 			var msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath']/@value");
-			msbuildExtensionsPath.Value += $";$({CustomMSBuildExtensionsPath})";
+			msbuildExtensionsPath.Value += ";" + customExtensionsPath;
+
+			msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath32']/@value");
+			msbuildExtensionsPath.Value += ";" + customExtensionsPath;
+
+			msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath64']/@value");
+			msbuildExtensionsPath.Value += ";" + customExtensionsPath;
 
 			xml.Save (Path.Combine (currentDir, "xabuild.exe.config"));
 		}
 
-		static bool LinkPortableProfiles(string programFiles, string frameworksDirectory)
+		static bool CreateSymbolicLink(string source, string target)
 		{
-			string portableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
-			string customProfiles   = Path.Combine (frameworksDirectory, ".NETPortable");
-			if (!Directory.Exists (customProfiles)) {
-				if (!CreateSymbolicLink (customProfiles, portableProfiles, SymbolLinkFlag.Directory | SymbolLinkFlag.AllowUnprivilegedCreate)) {
+			if (!Directory.Exists (source)) {
+				if (!CreateSymbolicLink (source, target, SymbolLinkFlag.Directory | SymbolLinkFlag.AllowUnprivilegedCreate)) {
 					var error = new Win32Exception ().Message;
-					Console.Error.WriteLine ($"Unable to create symbolic link from `{portableProfiles}` to `{customProfiles}`: {error}");
+					Console.Error.WriteLine ($"Unable to create symbolic link from `{source}` to `{target}`: {error}");
 					return false;
 				}
 			}
