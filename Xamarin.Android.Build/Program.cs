@@ -59,10 +59,10 @@ namespace Xamarin.Android.Build
 			globalProperties ["BaseIntermediateOutputPath"] = "obj\\";
 
 			//WTF??? Seems to fix PCLs when you remove FrameworkPathOverride
-			globalProperties["NoStdLib"] = "True";
+			//globalProperties["NoStdLib"] = "True";
 
 			//This was originally used on Windows, but seems to break w/ PCLs (tested Xamarin.Forms app)
-			//globalProperties ["FrameworkPathOverride"] = Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0");
+			globalProperties ["FrameworkPathOverride"] = Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0");
 
 			var toolsetLocations = ToolsetDefinitionLocations.Default;
 			var verbosity        = LoggerVerbosity.Diagnostic;
