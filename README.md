@@ -26,11 +26,11 @@ Existing values will remain unchanged besides the following:
     <property name="VsInstallRoot" value="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise" />
     <property name="RoslynTargetsPath" value="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\Roslyn" />
     <projectImportSearchPaths>
-    <searchPaths os="windows">
+      <searchPaths os="windows">
         <property name="MSBuildExtensionsPath" value="$(MSBuildProgramFiles32)\MSBuild;%USERPROFILE%\Desktop\Git\xamarin-android\bin\Debug\lib\xamarin.android\xbuild" />
         <property name="MSBuildExtensionsPath32" value="$(MSBuildProgramFiles32)\MSBuild;%USERPROFILE%\Desktop\Git\xamarin-android\bin\Debug\lib\xamarin.android\xbuild" />
         <property name="MSBuildExtensionsPath64" value="$(MSBuildProgramFiles32)\MSBuild;%USERPROFILE%\Desktop\Git\xamarin-android\bin\Debug\lib\xamarin.android\xbuild" />
-    </searchPaths>
+      </searchPaths>
     </projectImportSearchPaths>
   </toolset>
 </msbuildToolsets>
