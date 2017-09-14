@@ -4,12 +4,20 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Xml;
 
 namespace Xamarin.Android.Build
 {
+	enum SymbolLinkFlag {
+		File = 0,
+		Directory = 1,
+		AllowUnprivilegedCreate = 2,
+	}
+
 	class Program
 	{
 		const string CustomMSBuildExtensionsPath = "CustomMSBuildExtensionsPath";
@@ -34,11 +42,15 @@ namespace Xamarin.Android.Build
 			//Create a custom xabuild.exe.config
 			CreateConfig (currentDir, msbuildBin);
 
-			//Copy .NETPortable directory if needed
+			//Create link to .NETPortable directory if needed
 			string portableProfiles    = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
-			string copiedProfiles      = Path.Combine (frameworksDirectory, ".NETPortable");
-			if (!Directory.Exists (copiedProfiles)) {
-				Copy (new DirectoryInfo (portableProfiles), new DirectoryInfo (copiedProfiles));
+			string customProfiles      = Path.Combine (frameworksDirectory, ".NETPortable");
+			if (!Directory.Exists (customProfiles)) {
+				if (!CreateSymbolicLink(customProfiles, portableProfiles, SymbolLinkFlag.Directory | SymbolLinkFlag.AllowUnprivilegedCreate)) {
+					var error = new Win32Exception ().Message;
+					Console.Error.WriteLine ($"Unable to create symbolic link from `{portableProfiles}` to `{customProfiles}`: {error}");
+					return 1;
+				}
 			}
 
 			var globalProperties = new Dictionary<string, string> ();
@@ -99,18 +111,11 @@ namespace Xamarin.Android.Build
 			xml.Save (Path.Combine (currentDir, "xabuild.exe.config"));
 		}
 
-		static void Copy (DirectoryInfo source, DirectoryInfo target)
-		{
-			Directory.CreateDirectory (target.FullName);
 
-			foreach (var file in source.GetFiles ()) {
-				file.CopyTo (Path.Combine (target.FullName, file.Name), true);
-			}
-			
-			foreach (var directory in source.GetDirectories ()) {
-				var subDirectory = target.CreateSubdirectory (directory.Name);
-				Copy (directory, subDirectory);
-			}
 		}
+
+		[DllImport ("kernel32.dll")]
+		[return: MarshalAs (UnmanagedType.I1)]
+		static extern bool CreateSymbolicLink (string lpSymlinkFileName, string lpTargetFileName, SymbolLinkFlag dwFlags);
 	}
 }
