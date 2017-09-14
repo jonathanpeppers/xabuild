@@ -6,11 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Xml;
 
 namespace Xamarin.Android.Build
 {
 	class Program
 	{
+		const string CustomMSBuildExtensionsPath = "CustomMSBuildExtensionsPath";
+
 		static int Main (string[] args)
 		{
 			string currentDir    = Path.GetDirectoryName (Assembly.GetEntryAssembly ().Location);
@@ -28,6 +31,9 @@ namespace Xamarin.Android.Build
 			string vsInstallRoot       = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", "Enterprise");
 			string msbuildBin          = Path.Combine (vsInstallRoot, "MSBuild", "15.0", "Bin");
 
+			//Create a custom xabuild.exe.config
+			CreateConfig (currentDir, msbuildBin);
+
 			//Copy .NETPortable directory if needed
 			string portableProfiles    = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 			string copiedProfiles      = Path.Combine (frameworksDirectory, ".NETPortable");
@@ -38,7 +44,7 @@ namespace Xamarin.Android.Build
 			var globalProperties = new Dictionary<string, string> ();
 
 			//NOTE: used in xabuild.exe.config
-			globalProperties ["CustomMSBuildExtensionsPath"] = Path.Combine (prefix, "xbuild");
+			globalProperties [CustomMSBuildExtensionsPath] = Path.Combine (prefix, "xbuild");
 
 			//Pulled from xabuild.sh
 			globalProperties ["AndroidSdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "sdk");
@@ -80,6 +86,17 @@ namespace Xamarin.Android.Build
 				var result = BuildManager.DefaultBuildManager.Build (parameters, request);
 				return result.OverallResult == BuildResultCode.Success ? 0 : 1;
 			}
+		}
+
+		static void CreateConfig(string currentDir, string msbuildBin)
+		{
+			XmlDocument xml = new XmlDocument ();
+			xml.Load (Path.Combine (msbuildBin, "MSBuild.exe.config"));
+
+			var searchPaths = xml.SelectSingleNode ("configuration/msbuildToolsets/toolset/projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath']/@value");
+			searchPaths.Value += $";$({CustomMSBuildExtensionsPath})";
+
+			xml.Save (Path.Combine (currentDir, "xabuild.exe.config"));
 		}
 
 		static void Copy (DirectoryInfo source, DirectoryInfo target)
