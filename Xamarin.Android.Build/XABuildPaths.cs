@@ -39,9 +39,9 @@ namespace Xamarin.Android.Build
 		public string PortableProfiles { get; private set; }
 
 		/// <summary>
-		/// Additional search path that needs to be added to $(MSBuildExtensionsPath)
+		/// Our default $(MSBuildExtensionPath) which should be the "xbuild" directory in the Xamarin.Android build output
 		/// </summary>
-		public string CustomMSBuildExtensionsPath { get; private set; }
+		public string MSBuildExtensionsPath { get; private set; }
 
 		/// <summary>
 		/// The xbuild-frameworks directory inside the Xamarin.Android build output
@@ -56,22 +56,22 @@ namespace Xamarin.Android.Build
 
 		public XABuildPaths ()
 		{
-			XABuildDirectory            = Path.GetDirectoryName (GetType ().Assembly.Location);
-			XamarinAndroidBuildOutput   = Path.GetFullPath (Path.Combine (XABuildDirectory, "..", "..", "..", "..", "xamarin-android", "bin", "Debug"));
+			XABuildDirectory          = Path.GetDirectoryName (GetType ().Assembly.Location);
+			XamarinAndroidBuildOutput = Path.GetFullPath (Path.Combine (XABuildDirectory, "..", "..", "..", "..", "xamarin-android", "bin", "Debug"));
 
-			string programFiles         = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
-			string userProfile          = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
-			string prefix               = Path.Combine (XamarinAndroidBuildOutput, "lib", "xamarin.android");
+			string programFiles       = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
+			string userProfile        = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
+			string prefix             = Path.Combine (XamarinAndroidBuildOutput, "lib", "xamarin.android");
 
-			FrameworksDirectory         = Path.Combine (prefix, "xbuild-frameworks");
-			VsInstallRoot               = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", "Enterprise");
-			PortableProfiles            = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
-			MSBuildPath                 = Path.Combine (VsInstallRoot, "MSBuild");
-			MSBuildBin                  = Path.Combine (MSBuildPath, "15.0", "Bin");
-			CustomMSBuildExtensionsPath = Path.Combine (prefix, "xbuild");
-			MonoAndroidToolsDirectory   = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
-			AndroidSdkDirectory         = Path.Combine (userProfile, "android-toolchain", "sdk");
-			AndroidNdkDirectory         = Path.Combine (userProfile, "android-toolchain", "ndk");
+			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");
+			VsInstallRoot             = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", "Enterprise");
+			PortableProfiles          = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+			MSBuildPath               = Path.Combine (VsInstallRoot, "MSBuild");
+			MSBuildBin                = Path.Combine (MSBuildPath, "15.0", "Bin");
+			MSBuildExtensionsPath     = Path.Combine (prefix, "xbuild");
+			MonoAndroidToolsDirectory = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
+			AndroidSdkDirectory       = Path.Combine (userProfile, "android-toolchain", "sdk");
+			AndroidNdkDirectory       = Path.Combine (userProfile, "android-toolchain", "ndk");
 		}
 	}
 }
