@@ -43,15 +43,7 @@ namespace Xamarin.Android.Build
 			CreateConfig (currentDir, vsInstallRoot, msbuildBin);
 
 			//Create link to .NETPortable directory if needed
-			string portableProfiles    = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
-			string customProfiles      = Path.Combine (frameworksDirectory, ".NETPortable");
-			if (!Directory.Exists (customProfiles)) {
-				if (!CreateSymbolicLink(customProfiles, portableProfiles, SymbolLinkFlag.Directory | SymbolLinkFlag.AllowUnprivilegedCreate)) {
-					var error = new Win32Exception ().Message;
-					Console.Error.WriteLine ($"Unable to create symbolic link from `{portableProfiles}` to `{customProfiles}`: {error}");
-					return 1;
-				}
-			}
+			LinkPortableProfiles (programFiles, frameworksDirectory);
 
 			var globalProperties = new Dictionary<string, string> ();
 
@@ -64,7 +56,6 @@ namespace Xamarin.Android.Build
 			globalProperties ["MonoAndroidToolsDirectory"]    = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
 			globalProperties ["MonoDroidInstallDirectory"]    = prefix;
 			globalProperties ["TargetFrameworkRootPath"]      = frameworksDirectory + Path.DirectorySeparatorChar; //NOTE: Must include trailing \
-			globalProperties ["BypassFrameworkInstallChecks"] = "True";
 
 			//For some reason this is defaulting to \, which places stuff in C:\Debug
 			globalProperties ["BaseIntermediateOutputPath"] = "obj\\";
@@ -114,6 +105,21 @@ namespace Xamarin.Android.Build
 			msbuildExtensionsPath.Value += $";$({CustomMSBuildExtensionsPath})";
 
 			xml.Save (Path.Combine (currentDir, "xabuild.exe.config"));
+		}
+
+		static bool LinkPortableProfiles(string programFiles, string frameworksDirectory)
+		{
+			string portableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+			string customProfiles   = Path.Combine (frameworksDirectory, ".NETPortable");
+			if (!Directory.Exists (customProfiles)) {
+				if (!CreateSymbolicLink (customProfiles, portableProfiles, SymbolLinkFlag.Directory | SymbolLinkFlag.AllowUnprivilegedCreate)) {
+					var error = new Win32Exception ().Message;
+					Console.Error.WriteLine ($"Unable to create symbolic link from `{portableProfiles}` to `{customProfiles}`: {error}");
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		[DllImport ("kernel32.dll")]
