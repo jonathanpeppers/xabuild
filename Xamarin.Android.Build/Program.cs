@@ -40,7 +40,7 @@ namespace Xamarin.Android.Build
 			string msbuildBin          = Path.Combine (vsInstallRoot, "MSBuild", "15.0", "Bin");
 
 			//Create a custom xabuild.exe.config
-			CreateConfig (currentDir, msbuildBin);
+			CreateConfig (currentDir, vsInstallRoot, msbuildBin);
 
 			//Create link to .NETPortable directory if needed
 			string portableProfiles    = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
@@ -59,22 +59,15 @@ namespace Xamarin.Android.Build
 			globalProperties [CustomMSBuildExtensionsPath] = Path.Combine (prefix, "xbuild");
 
 			//Pulled from xabuild.sh
-			globalProperties ["AndroidSdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "sdk");
-			globalProperties ["AndroidNdkDirectory"]         = Path.Combine (userProfile, "android-toolchain", "ndk");
-			globalProperties ["MonoAndroidToolsDirectory"]   = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
-			globalProperties ["MonoDroidInstallDirectory"]   = prefix;
-			globalProperties ["TargetFrameworkRootPath"]     = frameworksDirectory;
-			globalProperties ["VsInstallRoot"]               = vsInstallRoot;
-			globalProperties ["RoslynTargetsPath"]           = Path.Combine (msbuildBin, "Roslyn");
+			globalProperties ["AndroidSdkDirectory"]          = Path.Combine (userProfile, "android-toolchain", "sdk");
+			globalProperties ["AndroidNdkDirectory"]          = Path.Combine (userProfile, "android-toolchain", "ndk");
+			globalProperties ["MonoAndroidToolsDirectory"]    = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
+			globalProperties ["MonoDroidInstallDirectory"]    = prefix;
+			globalProperties ["TargetFrameworkRootPath"]      = frameworksDirectory + Path.DirectorySeparatorChar; //NOTE: Must include trailing \
+			globalProperties ["BypassFrameworkInstallChecks"] = "True";
 
 			//For some reason this is defaulting to \, which places stuff in C:\Debug
 			globalProperties ["BaseIntermediateOutputPath"] = "obj\\";
-
-			//WTF??? Seems to fix PCLs when you remove FrameworkPathOverride
-			//globalProperties["NoStdLib"] = "True";
-
-			//This was originally used on Windows, but seems to break w/ PCLs (tested Xamarin.Forms app)
-			globalProperties ["FrameworkPathOverride"] = Path.Combine (prefix, "xbuild-frameworks", "MonoAndroid", "v1.0");
 
 			var toolsetLocations = ToolsetDefinitionLocations.Default;
 			var verbosity        = LoggerVerbosity.Diagnostic;
@@ -100,18 +93,27 @@ namespace Xamarin.Android.Build
 			}
 		}
 
-		static void CreateConfig(string currentDir, string msbuildBin)
+		static void CreateConfig(string currentDir, string vsInstallRoot, string msbuildBin)
 		{
 			XmlDocument xml = new XmlDocument ();
 			xml.Load (Path.Combine (msbuildBin, "MSBuild.exe.config"));
 
-			var searchPaths = xml.SelectSingleNode ("configuration/msbuildToolsets/toolset/projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath']/@value");
-			searchPaths.Value += $";$({CustomMSBuildExtensionsPath})";
+			var toolsets = xml.SelectSingleNode ("configuration/msbuildToolsets/toolset");
+			var property = xml.CreateElement ("property");
+			property.SetAttribute ("name", "MSBuildBinPath");
+			property.SetAttribute ("value", msbuildBin);
+			//toolsets.AppendChild (property);
+
+			toolsets.SelectSingleNode ("property[@name='VsInstallRoot']/@value").Value      = vsInstallRoot;
+			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath']/@value").Value   = msbuildBin;
+			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath32']/@value").Value = msbuildBin;
+			toolsets.SelectSingleNode ("property[@name='MSBuildToolsPath64']/@value").Value = msbuildBin;
+			toolsets.SelectSingleNode ("property[@name='RoslynTargetsPath']/@value").Value  = Path.Combine (msbuildBin, "Roslyn");
+
+			var msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath']/@value");
+			msbuildExtensionsPath.Value += $";$({CustomMSBuildExtensionsPath})";
 
 			xml.Save (Path.Combine (currentDir, "xabuild.exe.config"));
-		}
-
-
 		}
 
 		[DllImport ("kernel32.dll")]
