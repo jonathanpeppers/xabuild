@@ -63,14 +63,9 @@ namespace Xamarin.Android.Build
 			SetProperty (toolsets, "TargetFrameworkRootPath", paths.FrameworksDirectory + Path.DirectorySeparatorChar); //NOTE: Must include trailing \
 			SetProperty (toolsets, "CSharpDesignTimeTargetsPath", paths.CSharpDesignTimeTargetsPath);
 
-			var msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath']/@value");
-			msbuildExtensionsPath.Value += ";" + paths.CustomMSBuildExtensionsPath;
-
-			msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath32']/@value");
-			msbuildExtensionsPath.Value += ";" + paths.CustomMSBuildExtensionsPath;
-
-			msbuildExtensionsPath = toolsets.SelectSingleNode ("projectImportSearchPaths/searchPaths/property[@name='MSBuildExtensionsPath64']/@value");
-			msbuildExtensionsPath.Value += ";" + paths.CustomMSBuildExtensionsPath;
+			foreach (XmlNode property in toolsets.SelectNodes("projectImportSearchPaths/searchPaths/property[starts-with(@name, 'MSBuildExtensionsPath')]/@value")) {
+				property.Value += ";" + paths.CustomMSBuildExtensionsPath;
+			}
 
 			xml.Save (Path.Combine (paths.XABuildDirectory, "xabuild.exe.config"));
 		}
