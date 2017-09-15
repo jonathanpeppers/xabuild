@@ -14,7 +14,7 @@ namespace Xamarin.Android.Build
 		public string XABuildDirectory { get; private set; }
 
 		/// <summary>
-		/// The build output directory of Xamarin.Android such as ~/Git/xamarin-android/bin/Debug
+		/// The build output directory of Xamarin.Android, which is a submodule in this repo. Assumes it is already built.
 		/// </summary>
 		public string XamarinAndroidBuildOutput { get; private set; }
 
@@ -57,7 +57,7 @@ namespace Xamarin.Android.Build
 		public XABuildPaths ()
 		{
 			XABuildDirectory          = Path.GetDirectoryName (GetType ().Assembly.Location);
-			XamarinAndroidBuildOutput = Path.GetFullPath (Path.Combine (XABuildDirectory, "..", "..", "..", "..", "xamarin-android", "bin", "Debug"));
+			XamarinAndroidBuildOutput = Path.GetFullPath (Path.Combine (XABuildDirectory, "..", "..", "..", "xamarin-android", "bin", "Debug"));
 
 			string programFiles       = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
 			string userProfile        = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
