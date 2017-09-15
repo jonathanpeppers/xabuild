@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -23,6 +24,8 @@ namespace Xamarin.Android.Build.Tests
 			currentDir = Path.GetDirectoryName (GetType ().Assembly.Location);
 			samplesDir = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "samples"));
 			xabuild = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "Xamarin.Android.Build", "bin", configuration, "xabuild.exe"));
+
+			Console.WriteLine($"xabuild.exe path {xabuild}");
 		}
 
 		/// <summary>
