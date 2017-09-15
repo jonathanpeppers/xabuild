@@ -8,6 +8,8 @@ namespace Xamarin.Android.Build
 	/// </summary>
 	class XABuildPaths
 	{
+		public bool IsWindows { get; private set; }
+
 		/// <summary>
 		/// Directory to xabuild.exe
 		/// </summary>
@@ -34,6 +36,11 @@ namespace Xamarin.Android.Build
 		public string MSBuildBin { get; private set; }
 
 		/// <summary>
+		/// Path to MSBuild's App.config file
+		/// </summary>
+		public string MSBuildConfig { get; private set; }
+
+		/// <summary>
 		/// Path to the .NETPortable directory
 		/// </summary>
 		public string PortableProfiles { get; private set; }
@@ -56,6 +63,7 @@ namespace Xamarin.Android.Build
 
 		public XABuildPaths ()
 		{
+			IsWindows                 = Environment.OSVersion.Platform == PlatformID.Win32NT;
 			XABuildDirectory          = Path.GetDirectoryName (GetType ().Assembly.Location);
 			XamarinAndroidBuildOutput = Path.GetFullPath (Path.Combine (XABuildDirectory, "..", "..", "..", "xamarin-android", "bin", "Debug"));
 
@@ -67,11 +75,22 @@ namespace Xamarin.Android.Build
 				VsInstallRoot = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", sku);
 				if (Directory.Exists (VsInstallRoot))
 					break;
+				else
+					VsInstallRoot = null;
 			}
 
-			PortableProfiles          = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
-			MSBuildPath               = Path.Combine (VsInstallRoot, "MSBuild");
-			MSBuildBin                = Path.Combine (MSBuildPath, "15.0", "Bin");
+			if (IsWindows) {
+				PortableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+				MSBuildPath      = Path.Combine (VsInstallRoot, "MSBuild");
+				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "Bin");
+				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.exe.config");
+			} else {
+				//NOTE: not right for Linux
+				MSBuildPath      = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/msbuild";
+				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "bin");
+				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.dll.config");
+			}
+
 			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");
 			MSBuildExtensionsPath     = Path.Combine (prefix, "xbuild");
 			MonoAndroidToolsDirectory = Path.Combine (prefix, "xbuild", "Xamarin", "Android");

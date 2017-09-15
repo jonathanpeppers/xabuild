@@ -38,7 +38,7 @@ namespace Xamarin.Android.Build
 		static void CreateConfig(XABuildPaths paths)
 		{
 			var xml = new XmlDocument ();
-			xml.Load (Path.Combine (paths.MSBuildBin, "MSBuild.exe.config"));
+			xml.Load (paths.MSBuildConfig);
 
 			var toolsets = xml.SelectSingleNode ("configuration/msbuildToolsets/toolset");
 			SetProperty (toolsets, "VsInstallRoot", paths.VsInstallRoot);
@@ -65,6 +65,9 @@ namespace Xamarin.Android.Build
 		/// </summary>
 		static void SetProperty(XmlNode toolsets, string name, string value)
 		{
+			if (string.IsNullOrEmpty (value))
+				return;
+
 			var valueAttribute = toolsets.SelectSingleNode ($"property[@name='{name}']/@value");
 			if (valueAttribute != null) {
 				valueAttribute.Value = value;
