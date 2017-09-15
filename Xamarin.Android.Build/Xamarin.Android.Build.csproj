@@ -11,6 +11,8 @@
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <_MSBuildExtension Condition=" '$(OS)' == 'Windows_NT' ">exe</_MSBuildExtension>
+    <_MSBuildExtension Condition=" '$(OS)' != 'Windows_NT' ">dll</_MSBuildExtension>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -33,13 +35,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MSBuild">
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe</HintPath>
+      <HintPath>$(MSBuildToolsPath)\MSBuild.$(_MSBuildExtension)</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build.Tasks.Core">
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\Microsoft.Build.Tasks.Core.dll</HintPath>
+      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build.Utilities.Core">
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\Microsoft.Build.Utilities.Core.dll</HintPath>
+      <HintPath>$(MSBuildToolsPath)\Microsoft.Build.Utilities.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,12 +53,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="XABuild.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XABuild.cs" />
     <Compile Include="XABuildPaths.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
-    <Delete Files="$(OutputPath)MSBuild.exe.config" />
+    <Delete Files="$(OutputPath)MSBuild.$(_MSBuildExtension).config" />
   </Target>
 </Project>
