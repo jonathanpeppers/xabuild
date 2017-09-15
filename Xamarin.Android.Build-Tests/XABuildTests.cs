@@ -21,7 +21,7 @@ namespace Xamarin.Android.Build.Tests
 			string configuration = "Release";
 #endif
 
-			currentDir = Path.GetDirectoryName (GetType ().Assembly.Location);
+			currentDir = TestContext.CurrentContext.TestDirectory;
 			samplesDir = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "samples"));
 			xabuild = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "Xamarin.Android.Build", "bin", configuration, "xabuild.exe"));
 
