@@ -80,15 +80,17 @@ namespace Xamarin.Android.Build
 			}
 
 			if (IsWindows) {
-				PortableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 				MSBuildPath      = Path.Combine (VsInstallRoot, "MSBuild");
 				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "Bin");
 				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.exe.config");
+				PortableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 			} else {
 				//NOTE: not right for Linux
-				MSBuildPath      = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/msbuild";
+				string mono      = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono";
+				MSBuildPath      = Path.Combine (mono, "msbuild");
 				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "bin");
 				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.dll.config");
+				PortableProfiles = Path.Combine (mono, "xbuild-frameworks", ".NETPortable");
 			}
 
 			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");

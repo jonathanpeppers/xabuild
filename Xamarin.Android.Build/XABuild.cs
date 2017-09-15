@@ -5,6 +5,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml;
 
+#if UNIX
+using Mono.Unix;
+#endif
+
 namespace Xamarin.Android.Build
 {
 	enum SymbolLinkFlag {
@@ -35,7 +39,7 @@ namespace Xamarin.Android.Build
 			return MSBuildApp.Main ();
 		}
 
-		static void CreateConfig(XABuildPaths paths)
+		static void CreateConfig (XABuildPaths paths)
 		{
 			var xml = new XmlDocument ();
 			xml.Load (paths.MSBuildConfig);
@@ -53,7 +57,7 @@ namespace Xamarin.Android.Build
 			SetProperty (toolsets, "MonoAndroidToolsDirectory", paths.MonoAndroidToolsDirectory);
 			SetProperty (toolsets, "TargetFrameworkRootPath", paths.FrameworksDirectory + Path.DirectorySeparatorChar); //NOTE: Must include trailing \
 
-			foreach (XmlNode property in toolsets.SelectNodes("projectImportSearchPaths/searchPaths/property[starts-with(@name, 'MSBuildExtensionsPath')]/@value")) {
+			foreach (XmlNode property in toolsets.SelectNodes ("projectImportSearchPaths/searchPaths/property[starts-with(@name, 'MSBuildExtensionsPath')]/@value")) {
 				property.Value += ";" + paths.MSBuildPath;
 			}
 
@@ -63,7 +67,7 @@ namespace Xamarin.Android.Build
 		/// <summary>
 		/// If the value exists, sets value attribute, else creates the element
 		/// </summary>
-		static void SetProperty(XmlNode toolsets, string name, string value)
+		static void SetProperty (XmlNode toolsets, string name, string value)
 		{
 			if (string.IsNullOrEmpty (value))
 				return;
@@ -79,9 +83,17 @@ namespace Xamarin.Android.Build
 			}
 		}
 
-		static bool CreateSymbolicLink(string source, string target)
+		static bool CreateSymbolicLink (string source, string target)
 		{
 			if (!Directory.Exists (source)) {
+#if UNIX
+				var fileInfo = new UnixFileInfo (target);
+				var link = fileInfo.CreateSymbolicLink (source);
+				if (!link.Exists) {
+					Console.Error.WriteLine ($"Unable to create symbolic link from `{source}` to `{target}`");
+					return false;
+				}
+#else
 				//NOTE: attempt with and without the AllowUnprivilegedCreate flag, seems to fix Windows Server 2016
 				if (!CreateSymbolicLink (source, target, SymbolLinkFlag.Directory | SymbolLinkFlag.AllowUnprivilegedCreate) &&
 					!CreateSymbolicLink (source, target, SymbolLinkFlag.Directory)) {
@@ -89,6 +101,7 @@ namespace Xamarin.Android.Build
 					Console.Error.WriteLine ($"Unable to create symbolic link from `{source}` to `{target}`: {error}");
 					return false;
 				}
+#endif
 			}
 
 			return true;
