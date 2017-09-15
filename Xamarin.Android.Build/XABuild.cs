@@ -28,7 +28,7 @@ namespace Xamarin.Android.Build
 			CreateConfig (paths);
 
 			//Create link to .NETPortable directory
-			if (Directory.Exists(paths.PortableProfiles) && !CreateSymbolicLink (Path.Combine (paths.FrameworksDirectory, ".NETPortable"), paths.PortableProfiles)) {
+			if (!CreateSymbolicLink (Path.Combine (paths.FrameworksDirectory, ".NETPortable"), paths.PortableProfiles)) {
 				return 1;
 			}
 
