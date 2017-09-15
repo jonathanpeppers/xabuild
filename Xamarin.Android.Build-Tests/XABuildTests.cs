@@ -35,15 +35,17 @@ namespace Xamarin.Android.Build.Tests
 		{
 			Clean (project);
 
-			var p = Process.Start (new ProcessStartInfo (xabuild, $"{project} /bl") {
+			using (var p = Process.Start (new ProcessStartInfo (xabuild, $"{project} /bl") {
 				CreateNoWindow = true,
+				RedirectStandardOutput = true,
 				UseShellExecute = false,
 				WorkingDirectory = Path.GetDirectoryName (xabuild),
-			});
-			p.WaitForExit ();
+			})) {
+				Console.Write (p.StandardOutput.ReadToEnd ());
 
-			if (p.ExitCode != 0)
-				Assert.Fail ("xabuild.exe failed!");
+				if (p.ExitCode != 0)
+					Assert.Fail ("xabuild.exe failed!");
+			}
 		}
 
 		void Clean(string project)
