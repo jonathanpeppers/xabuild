@@ -61,7 +61,7 @@ namespace Xamarin.Android.Build
 				property.Value += ";" + paths.MSBuildPath;
 			}
 
-			xml.Save (Path.Combine (paths.XABuildDirectory, "xabuild.exe.config"));
+			xml.Save (paths.XABuildConfig);
 		}
 
 		/// <summary>

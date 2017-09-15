@@ -16,6 +16,11 @@ namespace Xamarin.Android.Build
 		public string XABuildDirectory { get; private set; }
 
 		/// <summary>
+		/// Path to xabuild.exe.config, on Unix it seems to use MSBuild.dll.config instead
+		/// </summary>
+		public string XABuildConfig { get; private set; }
+
+		/// <summary>
 		/// The build output directory of Xamarin.Android, which is a submodule in this repo. Assumes it is already built.
 		/// </summary>
 		public string XamarinAndroidBuildOutput { get; private set; }
@@ -84,13 +89,15 @@ namespace Xamarin.Android.Build
 				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "Bin");
 				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.exe.config");
 				PortableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+				XABuildConfig    = Path.Combine (XABuildDirectory, "xabuild.exe.config");
 			} else {
-				//NOTE: not right for Linux
+				//NOTE: This is not correct for Linux
 				string mono      = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono";
 				MSBuildPath      = Path.Combine (mono, "msbuild");
 				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "bin");
 				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.dll.config");
 				PortableProfiles = Path.Combine (mono, "xbuild-frameworks", ".NETPortable");
+				XABuildConfig    = Path.Combine (XABuildDirectory, "MSBuild.dll.config");
 			}
 
 			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");
