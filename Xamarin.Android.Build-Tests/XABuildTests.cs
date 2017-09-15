@@ -43,8 +43,13 @@ namespace Xamarin.Android.Build.Tests
 			})) {
 				Console.Write (p.StandardOutput.ReadToEnd ());
 
-				if (p.ExitCode != 0)
+				if (p.ExitCode != 0) {
+					//In case of failure, output config file
+					Console.WriteLine ("xabuild.exe.config:");
+					Console.WriteLine (File.ReadAllText(xabuild + ".config"));
+
 					Assert.Fail ("xabuild.exe failed!");
+				}
 			}
 		}
 
