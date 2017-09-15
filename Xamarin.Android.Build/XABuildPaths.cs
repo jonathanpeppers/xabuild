@@ -63,11 +63,16 @@ namespace Xamarin.Android.Build
 			string userProfile        = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
 			string prefix             = Path.Combine (XamarinAndroidBuildOutput, "lib", "xamarin.android");
 
-			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");
-			VsInstallRoot             = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", "Enterprise");
+			foreach (var sku in new [] { "Enterprise", "Professional", "Community" }) {
+				VsInstallRoot = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", sku);
+				if (Directory.Exists (VsInstallRoot))
+					break;
+			}
+
 			PortableProfiles          = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 			MSBuildPath               = Path.Combine (VsInstallRoot, "MSBuild");
 			MSBuildBin                = Path.Combine (MSBuildPath, "15.0", "Bin");
+			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");
 			MSBuildExtensionsPath     = Path.Combine (prefix, "xbuild");
 			MonoAndroidToolsDirectory = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
 			AndroidSdkDirectory       = Path.Combine (userProfile, "android-toolchain", "sdk");
