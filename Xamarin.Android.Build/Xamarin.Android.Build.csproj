@@ -59,6 +59,9 @@
     <Compile Include="XABuild.cs" />
     <Compile Include="XABuildPaths.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Delete Files="$(OutputPath)MSBuild.$(_MSBuildExtension).config" />
