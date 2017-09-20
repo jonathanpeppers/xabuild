@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Xamarin.Android.Build.Tests</RootNamespace>
-    <AssemblyName>Xamarin.Android.Build-Tests</AssemblyName>
+    <AssemblyName>xabuild-tests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -50,9 +50,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Xamarin.Android.Build\Xamarin.Android.Build.csproj">
+    <ProjectReference Include="..\xabuild\xabuild.csproj">
       <Project>{b7a457e6-9cb6-43f6-bfd6-14d5397fb98d}</Project>
-      <Name>Xamarin.Android.Build</Name>
+      <Name>xabuild</Name>
       <Private>False</Private>
       <ReferenceOutputAssembly>False</ReferenceOutputAssembly>
     </ProjectReference>

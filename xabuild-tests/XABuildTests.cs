@@ -23,7 +23,7 @@ namespace Xamarin.Android.Build.Tests
 
 			currentDir = TestContext.CurrentContext.TestDirectory;
 			samplesDir = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "samples"));
-			xabuild = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "Xamarin.Android.Build", "bin", configuration, "xabuild.exe"));
+			xabuild = Path.GetFullPath (Path.Combine (currentDir, "..", "..", "..", "xabuild", "bin", configuration, "xabuild.exe"));
 
 			Console.WriteLine($"xabuild.exe path {xabuild}");
 		}

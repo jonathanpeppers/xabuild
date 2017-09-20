@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.Android.Build", "Xamarin.Android.Build\Xamarin.Android.Build.csproj", "{B7A457E6-9CB6-43F6-BFD6-14D5397FB98D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xabuild", "xabuild\xabuild.csproj", "{B7A457E6-9CB6-43F6-BFD6-14D5397FB98D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.Android.Build-Tests", "Xamarin.Android.Build-Tests\Xamarin.Android.Build-Tests.csproj", "{2943645C-8026-401C-84E5-A6166EFF216A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xabuild-Tests", "xabuild-Tests\xabuild-Tests.csproj", "{2943645C-8026-401C-84E5-A6166EFF216A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{F4825319-89F4-4862-9012-9A13B87F2126}"
 EndProject
