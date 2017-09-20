@@ -76,15 +76,16 @@ namespace Xamarin.Android.Build
 			string userProfile        = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
 			string prefix             = Path.Combine (XamarinAndroidBuildOutput, "lib", "xamarin.android");
 
-			foreach (var sku in new [] { "Enterprise", "Professional", "Community" }) {
-				VsInstallRoot = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", sku);
-				if (Directory.Exists (VsInstallRoot))
-					break;
-				else
-					VsInstallRoot = null;
-			}
-
 			if (IsWindows) {
+				foreach (var edition in new [] { "Enterprise", "Professional", "Community", "BuildTools" }) {
+					var vsInstall = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", edition);
+					if (Directory.Exists (vsInstall)) {
+						VsInstallRoot = vsInstall;
+					}
+				}
+				if (VsInstallRoot == null)
+					VsInstallRoot = programFiles;
+
 				MSBuildPath      = Path.Combine (VsInstallRoot, "MSBuild");
 				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "Bin");
 				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.exe.config");
