@@ -20,10 +20,11 @@ namespace Xamarin.Android.Build
 						return false;
 					}
 				} else {
-					var fileInfo = new UnixFileInfo (target);
-					var link = fileInfo.CreateSymbolicLink (source);
-					if (!link.Exists) {
-						Console.Error.WriteLine ($"Unable to create symbolic link from `{source}` to `{target}`");
+					try {
+						var fileInfo = new UnixFileInfo (target);
+						fileInfo.CreateSymbolicLink (source);
+					} catch (Exception exc) {
+						Console.Error.WriteLine ($"Unable to create symbolic link from `{source}` to `{target}`: {exc.Message}");
 						return false;
 					}
 				}
