@@ -3,8 +3,11 @@ image: Visual Studio 2017
 before_build:
 - cmd: >-
     git submodule update --init
+
     msbuild xamarin-android\build-tools\scripts\PrepareWindows.targets
+
     msbuild xamarin-android\Xamarin.Android.sln
+
     nuget restore xabuild.sln
 build:
   project: xabuild.sln
