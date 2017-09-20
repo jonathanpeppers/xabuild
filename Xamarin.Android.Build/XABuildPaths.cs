@@ -81,6 +81,7 @@ namespace Xamarin.Android.Build
 					var vsInstall = Path.Combine (programFiles, "Microsoft Visual Studio", "2017", edition);
 					if (Directory.Exists (vsInstall)) {
 						VsInstallRoot = vsInstall;
+						break;
 					}
 				}
 				if (VsInstallRoot == null)
