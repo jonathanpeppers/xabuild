@@ -28,9 +28,9 @@ The following values are modified, based on the `xamarin-android` repo being che
     <property name="RoslynTargetsPath" value="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\Roslyn" />
     <projectImportSearchPaths>
       <searchPaths os="windows">
-        <property name="MSBuildExtensionsPath" value="$(MSBuildProgramFiles32)\MSBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild" />
-        <property name="MSBuildExtensionsPath32" value="$(MSBuildProgramFiles32)\MSBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild" />
-        <property name="MSBuildExtensionsPath64" value="$(MSBuildProgramFiles32)\MSBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild" />
+        <property name="MSBuildExtensionsPath" value="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild;$(MSBuildProgramFiles32)\MSBuild" />
+        <property name="MSBuildExtensionsPath32" value="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild;$(MSBuildProgramFiles32)\MSBuild" />
+        <property name="MSBuildExtensionsPath64" value="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild;$(MSBuildProgramFiles32)\MSBuild" />
       </searchPaths>
     </projectImportSearchPaths>
   </toolset>
