@@ -63,7 +63,6 @@ An example `MSBuild.dll.config`:
         <property name="MSBuildExtensionsPath" value="/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/msbuild;/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/xbuild" />
         <property name="MSBuildExtensionsPath32" value="/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/msbuild;/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/xbuild" />
         <property name="MSBuildExtensionsPath64" value="/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/msbuild;/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/xbuild" />
-        <property name="VSToolsPath" value="/Library/Frameworks/Mono.framework/External/xbuild/Microsoft/VisualStudio/v$(VisualStudioVersion)" />
       </searchPaths>
     </projectImportSearchPaths>
   </toolset>
