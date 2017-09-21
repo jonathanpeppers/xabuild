@@ -56,6 +56,11 @@ namespace Xamarin.Android.Build
 		public string MSBuildExtensionsPath { get; private set; }
 
 		/// <summary>
+		/// Array of search paths for MSBuildExtensionsPath
+		/// </summary>
+		public string [] ProjectImportSearchPaths { get; private set; }
+
+		/// <summary>
 		/// The xbuild-frameworks directory inside the Xamarin.Android build output
 		/// </summary>
 		public string FrameworksDirectory { get; private set; }
@@ -87,19 +92,21 @@ namespace Xamarin.Android.Build
 				if (VsInstallRoot == null)
 					VsInstallRoot = programFiles;
 
-				MSBuildPath      = Path.Combine (VsInstallRoot, "MSBuild");
-				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "Bin");
-				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.exe.config");
-				PortableProfiles = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
-				XABuildConfig    = Path.Combine (XABuildDirectory, "xabuild.exe.config");
+				MSBuildPath              = Path.Combine (VsInstallRoot, "MSBuild");
+				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "Bin");
+				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.exe.config");
+				ProjectImportSearchPaths = new [] { MSBuildPath };
+				PortableProfiles         = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+				XABuildConfig            = Path.Combine (XABuildDirectory, "xabuild.exe.config");
 			} else {
-				//NOTE: This is not correct for Linux
-				string mono      = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono";
-				MSBuildPath      = Path.Combine (mono, "msbuild");
-				MSBuildBin       = Path.Combine (MSBuildPath, "15.0", "bin");
-				MSBuildConfig    = Path.Combine (MSBuildBin, "MSBuild.dll.config");
-				PortableProfiles = Path.Combine (mono, "xbuild-frameworks", ".NETPortable");
-				XABuildConfig    = Path.Combine (XABuildDirectory, "MSBuild.dll.config");
+				//NOTE: This mono path is not correct for Linux
+				string mono              = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono";
+				MSBuildPath              = Path.Combine (mono, "msbuild");
+				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "bin");
+				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.dll.config");
+				ProjectImportSearchPaths = new [] { MSBuildPath, Path.Combine (mono, "xbuild") };
+				PortableProfiles         = Path.Combine (mono, "xbuild-frameworks", ".NETPortable");
+				XABuildConfig            = Path.Combine (XABuildDirectory, "MSBuild.dll.config");
 			}
 
 			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");
