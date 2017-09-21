@@ -35,12 +35,22 @@ namespace Xamarin.Android.Build.Tests
 		{
 			Clean (project);
 
-			using (var p = Process.Start (new ProcessStartInfo (xabuild, $"{project} /bl") {
+			var psi = new ProcessStartInfo () {
 				CreateNoWindow = true,
 				RedirectStandardOutput = true,
 				UseShellExecute = false,
 				WorkingDirectory = Path.GetDirectoryName (xabuild),
-			})) {
+			};
+
+			if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
+				psi.FileName = xabuild;
+				psi.Arguments = $"{project} /bl";
+			} else {
+				psi.FileName = "mono";
+				psi.Arguments = $"{xabuild} {project} /bl";
+			}
+
+			using (var p = Process.Start (psi)) {
 				Console.Write (p.StandardOutput.ReadToEnd ());
 
 				if (p.ExitCode != 0) {
