@@ -46,7 +46,7 @@ namespace Xamarin.Android.Build
 			SetProperty (toolsets, "TargetFrameworkRootPath", paths.FrameworksDirectory + Path.DirectorySeparatorChar); //NOTE: Must include trailing \
 
 			foreach (XmlNode property in toolsets.SelectNodes ("projectImportSearchPaths/searchPaths/property[starts-with(@name, 'MSBuildExtensionsPath')]/@value")) {
-				property.Value = string.Join (";", paths.ProjectImportSearchPaths) + ";" + property.Value;
+				property.Value = string.Join (";", paths.ProjectImportSearchPaths);
 			}
 
 			xml.Save (paths.XABuildConfig);

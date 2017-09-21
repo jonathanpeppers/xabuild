@@ -95,7 +95,7 @@ namespace Xamarin.Android.Build
 				MSBuildPath              = Path.Combine (VsInstallRoot, "MSBuild");
 				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "Bin");
 				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.exe.config");
-				ProjectImportSearchPaths = new [] { MSBuildPath };
+				ProjectImportSearchPaths = new [] { MSBuildPath, "$(MSBuildProgramFiles32)\\MSBuild" };
 				PortableProfiles         = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 				XABuildConfig            = Path.Combine (XABuildDirectory, "xabuild.exe.config");
 			} else {
