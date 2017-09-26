@@ -10,6 +10,8 @@ namespace Xamarin.Android.Build
 	{
 		public bool IsWindows { get; private set; }
 
+		public bool IsMacOS { get; private set; }
+
 		/// <summary>
 		/// Directory to xabuild.exe
 		/// </summary>
@@ -74,6 +76,7 @@ namespace Xamarin.Android.Build
 		public XABuildPaths ()
 		{
 			IsWindows                 = Environment.OSVersion.Platform == PlatformID.Win32NT;
+			IsMacOS                   = Environment.OSVersion.Platform == PlatformID.MacOSX;
 			XABuildDirectory          = Path.GetDirectoryName (GetType ().Assembly.Location);
 			XamarinAndroidBuildOutput = Path.GetFullPath (Path.Combine (XABuildDirectory, "..", "..", "..", "xamarin-android", "bin", "Debug"));
 
@@ -99,8 +102,7 @@ namespace Xamarin.Android.Build
 				PortableProfiles         = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 				XABuildConfig            = Path.Combine (XABuildDirectory, "xabuild.exe.config");
 			} else {
-				//NOTE: This mono path is not correct for Linux
-				string mono              = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono";
+				string mono              = IsMacOS ? "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono" : "/usr/lib/mono";
 				MSBuildPath              = Path.Combine (mono, "msbuild");
 				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "bin");
 				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.dll.config");
