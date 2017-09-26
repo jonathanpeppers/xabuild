@@ -11,12 +11,12 @@ Prototype of xabuild.exe, don't look here!
 
 ## Example xabuild.exe.config
 
-The following values are modified, based on the `xamarin-android` repo being checked out adjacent to `xabuild`'s repo:
+The following values are modified, based on the `xamarin-android` submodule:
 ```xml
 <msbuildToolsets default="15.0">
   <toolset toolsVersion="15.0">
-    <property name="TargetFrameworkRootPath" value="$(UserProfile)\Desktop\Git\xamarin-android\bin\Debug\lib\xamarin.android\xbuild-frameworks\" />
-    <property name="MonoAndroidToolsDirectory" value="$(UserProfile)\Desktop\Git\xamarin-android\bin\Debug\lib\xamarin.android\xbuild\Xamarin\Android" />
+    <property name="TargetFrameworkRootPath" value="$(UserProfile)\Desktop\Git\xabuild\xamarin-android\bin\Debug\lib\xamarin.android\xbuild-frameworks\" />
+    <property name="MonoAndroidToolsDirectory" value="$(UserProfile)\Desktop\Git\xabuild\xamarin-android\bin\Debug\lib\xamarin.android\xbuild\Xamarin\Android" />
     <property name="AndroidNdkDirectory" value="$(UserProfile)\android-toolchain\ndk" />
     <property name="AndroidSdkDirectory" value="$(UserProfile)\android-toolchain\sdk" />
     <property name="MSBuildToolsPath" value="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin" />
