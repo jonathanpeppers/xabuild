@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Xamarin.Android.Build
 {
@@ -76,7 +77,7 @@ namespace Xamarin.Android.Build
 		public XABuildPaths ()
 		{
 			IsWindows                 = Environment.OSVersion.Platform == PlatformID.Win32NT;
-			IsMacOS                   = Environment.OSVersion.Platform == PlatformID.MacOSX;
+			IsMacOS                   = !IsWindows && IsDarwin ();
 			XABuildDirectory          = Path.GetDirectoryName (GetType ().Assembly.Location);
 			XamarinAndroidBuildOutput = Path.GetFullPath (Path.Combine (XABuildDirectory, "..", "..", "..", "xamarin-android", "bin", "Debug"));
 
@@ -116,6 +117,26 @@ namespace Xamarin.Android.Build
 			MonoAndroidToolsDirectory = Path.Combine (prefix, "xbuild", "Xamarin", "Android");
 			AndroidSdkDirectory       = Path.Combine (userProfile, "android-toolchain", "sdk");
 			AndroidNdkDirectory       = Path.Combine (userProfile, "android-toolchain", "ndk");
+		}
+
+		[DllImport ("libc")]
+		static extern int uname (IntPtr buf);
+
+		static bool IsDarwin ()
+		{
+			IntPtr buf = IntPtr.Zero;
+			try {
+				buf = Marshal.AllocHGlobal (8192);
+				if (uname (buf) == 0) {
+					string os = Marshal.PtrToStringAnsi (buf);
+					return os == "Darwin";
+				}
+			} catch {
+			} finally {
+				if (buf != IntPtr.Zero)
+					Marshal.FreeHGlobal (buf);
+			}
+			return false;
 		}
 	}
 }
