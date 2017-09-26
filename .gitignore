@@ -289,3 +289,6 @@ __pycache__/
 
 # MSBuild logs
 *.binlog
+
+# Xamarin.Android
+Resource.designer.cs
