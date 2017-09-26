@@ -45,7 +45,33 @@ namespace Xamarin.Android.Build
 			SetProperty (toolsets, "MonoAndroidToolsDirectory", paths.MonoAndroidToolsDirectory);
 			SetProperty (toolsets, "TargetFrameworkRootPath", paths.FrameworksDirectory + Path.DirectorySeparatorChar); //NOTE: Must include trailing \
 
-			foreach (XmlNode property in toolsets.SelectNodes ("projectImportSearchPaths/searchPaths/property[starts-with(@name, 'MSBuildExtensionsPath')]/@value")) {
+			var projectImportSearchPaths = toolsets.SelectSingleNode ("projectImportSearchPaths");
+			var searchPaths = projectImportSearchPaths.SelectSingleNode ($"searchPaths[@os='{paths.SearchPathsOS}']") as XmlElement;
+
+			//NOTE: on Linux, the searchPaths XML element does not exist, so we have to create it
+			if (searchPaths == null) {
+				searchPaths = xml.CreateElement ("searchPaths");
+				searchPaths.SetAttribute ("os", paths.SearchPathsOS);
+
+				var property = xml.CreateElement ("property");
+				property.SetAttribute ("name", "MSBuildExtensionsPath");
+				property.SetAttribute ("value", "");
+				searchPaths.AppendChild (property);
+
+				property = xml.CreateElement ("property");
+				property.SetAttribute ("name", "MSBuildExtensionsPath32");
+				property.SetAttribute ("value", "");
+				searchPaths.AppendChild (property);
+
+				property = xml.CreateElement ("property");
+				property.SetAttribute ("name", "MSBuildExtensionsPath64");
+				property.SetAttribute ("value", "");
+				searchPaths.AppendChild (property);
+
+				projectImportSearchPaths.AppendChild (searchPaths);
+			}
+
+			foreach (XmlNode property in searchPaths.SelectNodes ("property[starts-with(@name, 'MSBuildExtensionsPath')]/@value")) {
 				property.Value = string.Join (";", paths.ProjectImportSearchPaths);
 			}
 

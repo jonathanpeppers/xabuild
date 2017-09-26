@@ -13,6 +13,8 @@ namespace Xamarin.Android.Build
 
 		public bool IsMacOS { get; private set; }
 
+		public bool IsLinux { get; private set; }
+
 		/// <summary>
 		/// Directory to xabuild.exe
 		/// </summary>
@@ -68,6 +70,12 @@ namespace Xamarin.Android.Build
 		/// </summary>
 		public string FrameworksDirectory { get; private set; }
 
+		/// <summary>
+		/// Search paths for MSBuildExtensionsPath are specified by an "os" attribute
+		/// NOTE: Values are "windows", "osx", or "unix"
+		/// </summary>
+		public string SearchPathsOS { get; set; }
+
 		public string MonoAndroidToolsDirectory { get; private set; }
 
 		public string AndroidSdkDirectory { get; private set; }
@@ -78,6 +86,7 @@ namespace Xamarin.Android.Build
 		{
 			IsWindows                 = Environment.OSVersion.Platform == PlatformID.Win32NT;
 			IsMacOS                   = !IsWindows && IsDarwin ();
+			IsLinux                   = !IsWindows && !IsMacOS;
 			XABuildDirectory          = Path.GetDirectoryName (GetType ().Assembly.Location);
 			XamarinAndroidBuildOutput = Path.GetFullPath (Path.Combine (XABuildDirectory, "..", "..", "..", "xamarin-android", "bin", "Debug"));
 
@@ -102,6 +111,7 @@ namespace Xamarin.Android.Build
 				ProjectImportSearchPaths = new [] { MSBuildPath, "$(MSBuildProgramFiles32)\\MSBuild" };
 				PortableProfiles         = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
 				XABuildConfig            = Path.Combine (XABuildDirectory, "xabuild.exe.config");
+				SearchPathsOS            = "windows";
 			} else {
 				string mono              = IsMacOS ? "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono" : "/usr/lib/mono";
 				MSBuildPath              = Path.Combine (mono, "msbuild");
@@ -110,6 +120,7 @@ namespace Xamarin.Android.Build
 				ProjectImportSearchPaths = new [] { MSBuildPath, Path.Combine (mono, "xbuild") };
 				PortableProfiles         = Path.Combine (mono, "xbuild-frameworks", ".NETPortable");
 				XABuildConfig            = Path.Combine (XABuildDirectory, "MSBuild.dll.config");
+				SearchPathsOS            = IsMacOS ? "osx" : "unix";
 			}
 
 			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");
