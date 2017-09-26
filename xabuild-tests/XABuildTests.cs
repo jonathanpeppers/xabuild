@@ -86,5 +86,11 @@ namespace Xamarin.Android.Build.Tests
 		{
 			XABuild (Path.Combine (samplesDir, "HelloForms", "HelloForms.Android", "HelloForms.Android.csproj"));
 		}
+
+		[Test]
+		public void HelloFSharp ()
+		{
+			XABuild (Path.Combine (samplesDir, "HelloFSharp", "HelloFSharp.fsproj"));
+		}
 	}
 }
