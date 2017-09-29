@@ -19,9 +19,12 @@ namespace Xamarin.Android.Build
 			//Create a custom xabuild.exe.config
 			CreateConfig (paths);
 
-			//Create link to .NETPortable directory
-			if (!SymbolicLink.Create (Path.Combine (paths.FrameworksDirectory, ".NETPortable"), paths.PortableProfiles)) {
-				return 1;
+			//Create link to .NETFramework and .NETPortable directory
+			foreach (var dir in Directory.GetDirectories(paths.SystemProfiles)) {
+				var name = Path.GetFileName(dir);
+				if (!SymbolicLink.Create(Path.Combine(paths.FrameworksDirectory, name), dir)) {
+					return 1;
+				}
 			}
 
 			return MSBuildApp.Main ();

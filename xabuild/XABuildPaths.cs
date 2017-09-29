@@ -51,9 +51,9 @@ namespace Xamarin.Android.Build
 		public string MSBuildConfig { get; private set; }
 
 		/// <summary>
-		/// Path to the .NETPortable directory
+		/// Path to the system directory containing .NETPortable and .NETFramework
 		/// </summary>
-		public string PortableProfiles { get; private set; }
+		public string SystemProfiles { get; private set; }
 
 		/// <summary>
 		/// Our default $(MSBuildExtensionPath) which should be the "xbuild" directory in the Xamarin.Android build output
@@ -109,7 +109,7 @@ namespace Xamarin.Android.Build
 				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "Bin");
 				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.exe.config");
 				ProjectImportSearchPaths = new [] { MSBuildPath, "$(MSBuildProgramFiles32)\\MSBuild" };
-				PortableProfiles         = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework", ".NETPortable");
+				SystemProfiles           = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework");
 				XABuildConfig            = Path.Combine (XABuildDirectory, "xabuild.exe.config");
 				SearchPathsOS            = "windows";
 			} else {
@@ -118,7 +118,7 @@ namespace Xamarin.Android.Build
 				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "bin");
 				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.dll.config");
 				ProjectImportSearchPaths = new [] { MSBuildPath, Path.Combine (mono, "xbuild") };
-				PortableProfiles         = Path.Combine (mono, "xbuild-frameworks", ".NETPortable");
+				SystemProfiles           = Path.Combine (mono, "xbuild-frameworks");
 				XABuildConfig            = Path.Combine (XABuildDirectory, "MSBuild.dll.config");
 				SearchPathsOS            = IsMacOS ? "osx" : "unix";
 			}
