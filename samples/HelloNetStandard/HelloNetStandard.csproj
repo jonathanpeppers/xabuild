@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<DebugType>full</DebugType>
+		<TargetFramework>netstandard1.4</TargetFramework>
+		<Configuration>Release</Configuration>
+		<PackageTargetFallback>portable-net45+win8+wpa81+wp8</PackageTargetFallback>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Xamarin.Forms" Version="2.3.4.231"/>
+		<PackageReference Include="System.IO.Packaging" Version="4.4.0"/>
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove="**\*.xaml" >
+		</None>
+		<Compile Update="**\*.xaml.cs" DependentUpon="%(Filename)" >
+		</Compile>
+		<EmbeddedResource Include="**\*.xaml" Generator="MSBuild:UpdateDesignTimeXaml" SubType="Designer" >
+		</EmbeddedResource>
+	</ItemGroup>
+
+</Project>
