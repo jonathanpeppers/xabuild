@@ -89,7 +89,9 @@ namespace Xamarin.Android.Build
 
 			xml.Save (paths.XABuildConfig);
 
-			Environment.SetEnvironmentVariable ("MSBuildSDKsPath", paths.MSBuildSdksPath);
+			if (Directory.Exists (paths.MSBuildSdksPath)) {
+				Environment.SetEnvironmentVariable ("MSBuildSDKsPath", paths.MSBuildSdksPath);
+			}
 			Environment.SetEnvironmentVariable ("MSBUILD_EXE_PATH", paths.MSBuildExeTempPath, EnvironmentVariableTarget.Process);
 		}
 
