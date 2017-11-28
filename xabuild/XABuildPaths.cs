@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Xamarin.Android.Build
@@ -120,7 +121,7 @@ namespace Xamarin.Android.Build
 				MSBuildPath              = Path.Combine (VsInstallRoot, "MSBuild");
 				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "Bin");
 				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.exe.config");
-				MSBuildSdksPath          = Path.Combine (MSBuildPath, "Sdks");
+				MSBuildSdksPath          = FindLatestDotNetSdk (Path.Combine (Environment.GetEnvironmentVariable ("ProgramW6432"), "dotnet", "sdk")) ?? Path.Combine (MSBuildPath, "Sdks");
 				ProjectImportSearchPaths = new [] { MSBuildPath, "$(MSBuildProgramFiles32)\\MSBuild" };
 				SystemProfiles           = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework");
 				SearchPathsOS            = "windows";
@@ -131,7 +132,7 @@ namespace Xamarin.Android.Build
 				MSBuildPath              = Path.Combine (mono, "msbuild");
 				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "bin");
 				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.dll.config");
-				MSBuildSdksPath          = "/usr/local/share/dotnet/sdk/2.0.0/Sdks";
+				MSBuildSdksPath          = FindLatestDotNetSdk ("/usr/local/share/dotnet/sdk");
 				ProjectImportSearchPaths = new [] { MSBuildPath, Path.Combine (mono, "xbuild"), Path.Combine (monoExternal, "xbuild") };
 				SystemProfiles           = Path.Combine (mono, "xbuild-frameworks");
 				SearchPathsOS            = IsMacOS ? "osx" : "unix";
@@ -164,6 +165,26 @@ namespace Xamarin.Android.Build
 					Marshal.FreeHGlobal (buf);
 			}
 			return false;
+		}
+
+		string FindLatestDotNetSdk(string dotNetPath)
+		{
+			if (Directory.Exists(dotNetPath)) {
+				var directories = from dir in Directory.EnumerateDirectories (dotNetPath)
+								  let version = GetVersionFromDirectory (dir)
+								  where version != null
+								  orderby version descending
+								  select Path.Combine (dir, "Sdks");
+				return directories.FirstOrDefault ();
+			}
+			return null;
+		}
+
+		static Version GetVersionFromDirectory(string dir)
+		{
+			Version v;
+			Version.TryParse (Path.GetFileName (dir), out v);
+			return v;
 		}
 	}
 }

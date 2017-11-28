@@ -96,7 +96,7 @@ namespace Xamarin.Android.Build.Tests
 		[Test]
 		public void HelloNetStandard()
 		{
-			XABuild (Path.Combine (samplesDir, "HelloNetStandard", "HelloNetStandard.csproj"));
+			XABuild (Path.Combine (samplesDir, "HelloNetStandard", "HelloNetStandard.csproj"), "/t:Restore /t:Build");
 		}
 
 		[Test]
