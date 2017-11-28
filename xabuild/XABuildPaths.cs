@@ -92,6 +92,8 @@ namespace Xamarin.Android.Build
 
 		public string AndroidNdkDirectory { get; private set; }
 
+		public string NuGetRestoreTargets { get; private set; }
+
 		public XABuildPaths ()
 		{
 			IsWindows                 = Environment.OSVersion.Platform == PlatformID.Win32NT;
@@ -122,6 +124,7 @@ namespace Xamarin.Android.Build
 				ProjectImportSearchPaths = new [] { MSBuildPath, "$(MSBuildProgramFiles32)\\MSBuild" };
 				SystemProfiles           = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework");
 				SearchPathsOS            = "windows";
+				NuGetRestoreTargets      = Path.Combine (VsInstallRoot, "Common7", "IDE", "CommonExtensions", "Microsoft", "NuGet", "NuGet.targets");
 			} else {
 				string mono              = IsMacOS ? "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono" : "/usr/lib/mono";
 				string monoExternal      = IsMacOS ? "/Library/Frameworks/Mono.framework/External/" : "/usr/lib/mono";
