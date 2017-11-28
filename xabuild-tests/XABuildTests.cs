@@ -31,7 +31,7 @@ namespace Xamarin.Android.Build.Tests
 		/// <summary>
 		/// Runs xabuild.exe and asserts on failure
 		/// </summary>
-		void XABuild(string project)
+		void XABuild(string project, string extraArgs = null)
 		{
 			Clean (project);
 
@@ -44,10 +44,10 @@ namespace Xamarin.Android.Build.Tests
 
 			if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
 				psi.FileName = xabuild;
-				psi.Arguments = $"{project} /bl";
+				psi.Arguments = $"{project} /bl {extraArgs}";
 			} else {
 				psi.FileName = "mono";
-				psi.Arguments = $"{xabuild} {project} /bl";
+				psi.Arguments = $"{xabuild} {project} /bl {extraArgs}";
 			}
 
 			using (var p = Process.Start (psi)) {
@@ -97,6 +97,12 @@ namespace Xamarin.Android.Build.Tests
 		public void HelloNetStandard()
 		{
 			XABuild (Path.Combine (samplesDir, "HelloNetStandard", "HelloNetStandard.csproj"));
+		}
+
+		[Test]
+		public void RestoreNetStandard ()
+		{
+			XABuild (Path.Combine (samplesDir, "HelloNetStandard", "HelloNetStandard.csproj"), "/t:Restore");
 		}
 	}
 }
