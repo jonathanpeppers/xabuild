@@ -50,8 +50,15 @@ namespace Xamarin.Android.Build.Tests
 				psi.Arguments = $"{xabuild} {project} /bl {extraArgs}";
 			}
 
-			using (var p = Process.Start (psi)) {
-				Console.Write (p.StandardOutput.ReadToEnd ());
+			using (var p = new Process()) {
+				p.OutputDataReceived += (sender, e) => {
+					Console.WriteLine (e.Data);
+				};
+
+				p.StartInfo = psi;
+				p.Start ();
+				p.BeginOutputReadLine ();
+				p.WaitForExit ();
 
 				if (p.ExitCode != 0) {
 					//In case of failure, output config file
