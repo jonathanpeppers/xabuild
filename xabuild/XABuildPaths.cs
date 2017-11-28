@@ -93,6 +93,8 @@ namespace Xamarin.Android.Build
 
 		public string AndroidNdkDirectory { get; private set; }
 
+		public string DotNetSdkPath { get; private set; }
+
 		public string NuGetRestoreTargets { get; private set; }
 
 		public XABuildPaths ()
@@ -121,7 +123,8 @@ namespace Xamarin.Android.Build
 				MSBuildPath              = Path.Combine (VsInstallRoot, "MSBuild");
 				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "Bin");
 				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.exe.config");
-				MSBuildSdksPath          = FindLatestDotNetSdk (Path.Combine (Environment.GetEnvironmentVariable ("ProgramW6432"), "dotnet", "sdk")) ?? Path.Combine (MSBuildPath, "Sdks");
+				DotNetSdkPath            = FindLatestDotNetSdk (Path.Combine (Environment.GetEnvironmentVariable ("ProgramW6432"), "dotnet", "sdk"));
+				MSBuildSdksPath          = DotNetSdkPath ?? Path.Combine (MSBuildPath, "Sdks");
 				ProjectImportSearchPaths = new [] { MSBuildPath, "$(MSBuildProgramFiles32)\\MSBuild" };
 				SystemProfiles           = Path.Combine (programFiles, "Reference Assemblies", "Microsoft", "Framework");
 				SearchPathsOS            = "windows";
@@ -132,10 +135,14 @@ namespace Xamarin.Android.Build
 				MSBuildPath              = Path.Combine (mono, "msbuild");
 				MSBuildBin               = Path.Combine (MSBuildPath, "15.0", "bin");
 				MSBuildConfig            = Path.Combine (MSBuildBin, "MSBuild.dll.config");
-				MSBuildSdksPath          = FindLatestDotNetSdk ("/usr/local/share/dotnet/sdk");
+				DotNetSdkPath            =
+					MSBuildSdksPath      = FindLatestDotNetSdk ("/usr/local/share/dotnet/sdk");
 				ProjectImportSearchPaths = new [] { MSBuildPath, Path.Combine (mono, "xbuild"), Path.Combine (monoExternal, "xbuild") };
 				SystemProfiles           = Path.Combine (mono, "xbuild-frameworks");
 				SearchPathsOS            = IsMacOS ? "osx" : "unix";
+				if (!string.IsNullOrEmpty (DotNetSdkPath)) {
+					NuGetRestoreTargets  = Path.Combine (DotNetSdkPath, "..", "NuGet.targets");
+				}
 			}
 
 			FrameworksDirectory       = Path.Combine (prefix, "xbuild-frameworks");
